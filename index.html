@@ -195,6 +195,60 @@
       font-weight: 400;
       font-size: 15px;
     }
+
+    /* Animación Cupra */
+    #cupra-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, rgba(17, 17, 17, .85) 0%, rgba(0, 0, 0, .95) 100%);
+      cursor: pointer;
+    }
+    #cupra-overlay.visible {
+      display: flex;
+      animation: overlay 2.6s ease forwards;
+    }
+    #cupra-anim {
+      width: min(70vw, 70vh, 420px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #cupra-overlay.visible #cupra-anim {
+      animation: crecer 2.6s cubic-bezier(.2, .8, .2, 1) forwards;
+    }
+    #cupra-logo {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 0 24px rgba(193, 125, 76, .7));
+    }
+    #cupra-texto {
+      display: none;
+      font-size: min(18vw, 120px);
+      font-weight: 800;
+      letter-spacing: .12em;
+      color: #c17d4c;
+      text-shadow: 0 0 24px rgba(193, 125, 76, .7);
+    }
+    #cupra-anim.sin-logo #cupra-logo { display: none; }
+    #cupra-anim.sin-logo #cupra-texto { display: block; }
+
+    @keyframes crecer {
+      0%   { transform: scale(.05) rotate(-180deg); opacity: 0; }
+      45%  { transform: scale(1.15) rotate(0deg);  opacity: 1; }
+      60%  { transform: scale(1); }
+      85%  { transform: scale(1);   opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    @keyframes overlay {
+      0%   { opacity: 0; }
+      10%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -215,11 +269,11 @@
     <h1>¡Genial!<br>¿Qué plan te apetece?</h1>
 
     <div class="planes" id="planes">
-      <button class="plan" data-plan="Ir a cenar"><span class="icono">🍝</span>Ir a cenar</button>
-      <button class="plan" data-plan="Ir al cine"><span class="icono">🎬</span>Ir al cine</button>
-      <button class="plan" data-plan="Tomar algo"><span class="icono">🍹</span>Tomar algo</button>
+      <button class="plan" data-plan="Vuelta en el Cupra"><span class="icono">🚗</span>Vuelta en el Cupra</button>
+      <button class="plan" data-plan="Comida en Riaño"><span class="icono">🏔️</span>Comida en Riaño</button>
+      <button class="plan" data-plan="Cocinar"><span class="icono">🍳</span>Cocinar</button>
       <button class="plan" data-plan="Dar un paseo"><span class="icono">🌳</span>Dar un paseo</button>
-      <button class="plan" data-plan="Hacer deporte"><span class="icono">⚽</span>Hacer deporte</button>
+      <button class="plan" data-plan="Cenar sushi"><span class="icono">🍣</span>Cenar sushi</button>
       <button class="plan" data-plan="OTRO"><span class="icono">✍️</span>OTRO</button>
     </div>
 
@@ -255,6 +309,14 @@
     <a id="btn-whatsapp" href="#" target="_blank" rel="noopener">Enviármelo por WhatsApp</a>
     <button class="volver" id="btn-volver">Cambiar plan o fecha</button>
   </section>
+
+  <!-- Animación del logo de Cupra -->
+  <div id="cupra-overlay" aria-hidden="true">
+    <div id="cupra-anim">
+      <img id="cupra-logo" src="cupra-logo.png" alt="Cupra" />
+      <div id="cupra-texto">CUPRA</div>
+    </div>
+  </div>
 
   <script>
     const mostrar = (id) => {
@@ -350,6 +412,22 @@
         (planElegido === 'OTRO' && otroTexto.value.trim() === '');
     }
 
+    // Logo de Cupra: si no existe cupra-logo.png se muestra el texto "CUPRA"
+    const cupraOverlay = document.getElementById('cupra-overlay');
+    const cupraAnim = document.getElementById('cupra-anim');
+    const cupraLogo = document.getElementById('cupra-logo');
+    cupraLogo.addEventListener('error', () => cupraAnim.classList.add('sin-logo'));
+    if (cupraLogo.complete && cupraLogo.naturalWidth === 0) cupraAnim.classList.add('sin-logo');
+
+    function animacionCupra() {
+      cupraOverlay.classList.remove('visible');
+      void cupraOverlay.offsetWidth; // reinicia la animación
+      cupraOverlay.classList.add('visible');
+    }
+    const cerrarCupra = () => cupraOverlay.classList.remove('visible');
+    cupraOverlay.addEventListener('animationend', (e) => { if (e.target === cupraOverlay) cerrarCupra(); });
+    cupraOverlay.addEventListener('click', cerrarCupra);
+
     planes.forEach(btn => {
       btn.addEventListener('click', () => {
         planes.forEach(b => b.classList.remove('elegido'));
@@ -357,6 +435,7 @@
         planElegido = btn.dataset.plan;
         otroWrap.classList.toggle('visible', planElegido === 'OTRO');
         if (planElegido === 'OTRO') otroTexto.focus();
+        if (planElegido === 'Vuelta en el Cupra') animacionCupra();
         actualizarConfirmar();
       });
     });
