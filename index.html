@@ -218,12 +218,32 @@
     let intentos = 0;
     let escala = 1;
 
+    // Escala máxima para que el SÍ quepa entero en la pantalla.
+    // El escalado se hace desde el centro del botón, así que se mira
+    // cuánto espacio libre hay desde ese centro hasta cada borde.
+    function escalaMaxima() {
+      const margen = 16;
+      const r = btnSi.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const medioAncho = Math.min(cx, window.innerWidth - cx) - margen;
+      const medioAlto = Math.min(cy, window.innerHeight - cy) - margen;
+      const maxX = medioAncho / (btnSi.offsetWidth / 2);
+      const maxY = medioAlto / (btnSi.offsetHeight / 2);
+      return Math.max(1, Math.min(maxX, maxY));
+    }
+
+    window.addEventListener('resize', () => {
+      escala = Math.min(escala, escalaMaxima());
+      btnSi.style.transform = `scale(${escala})`;
+    });
+
     function escaparNo(e) {
       if (e) e.preventDefault();
       intentos++;
 
       // El SÍ crece con cada intento
-      escala = Math.min(escala + 0.35, 8);
+      escala = Math.min(escala + 0.35, escalaMaxima());
       btnSi.style.transform = `scale(${escala})`;
 
       // El NO cambia de texto
