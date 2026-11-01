@@ -235,6 +235,24 @@
     }
     .resumen strong { color: #2563eb; }
 
+    #envio {
+      font-size: 15px;
+      margin: -12px 0 20px;
+      min-height: 22px;
+      color: #6b7280;
+    }
+    #envio.ok { color: #16a34a; }
+    #envio.error { color: #dc2626; }
+    #btn-reintentar {
+      margin-left: 6px;
+      background: none;
+      box-shadow: none;
+      color: #dc2626;
+      text-decoration: underline;
+      font-size: 15px;
+      padding: 0;
+    }
+
     #btn-whatsapp {
       background: #25d366;
       color: #fff;
@@ -395,6 +413,7 @@
     <h1>¡Plan cerrado!</h1>
     <p class="resumen">Has elegido: <strong id="plan-final"></strong><br>
       el <strong id="fecha-final"></strong> a las <strong id="hora-final"></strong></p>
+    <p id="envio" aria-live="polite"></p>
     <a id="btn-whatsapp" href="#" target="_blank" rel="noopener">Enviármelo por WhatsApp</a>
     <button class="volver" id="btn-volver">Cambiar plan o fecha</button>
   </section>
@@ -606,7 +625,53 @@
       const msg = `¡Sí! Me apunto. Plan elegido: ${planFinal}, el ${fechaTexto} a las ${horaTexto}`;
       document.getElementById('btn-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
       mostrar('p-fin');
+
+      enviarCorreo({
+        plan: planFinal,
+        fecha: fechaTexto,
+        hora: horaTexto,
+        fecha_iso: inputFecha.value,
+        _subject: `Plan elegido: ${planFinal} (${fechaTexto}, ${horaTexto})`
+      });
     });
+
+    // ---------- Envío por correo con Formspree ----------
+    const FORMSPREE_URL = 'https://formspree.io/f/xwllrrov';
+    const envio = document.getElementById('envio');
+    let ultimoEnvio = null;
+
+    function estadoEnvio(texto, clase) {
+      envio.className = clase || '';
+      envio.textContent = texto;
+    }
+
+    async function enviarCorreo(datos) {
+      ultimoEnvio = datos;
+      estadoEnvio('📧 Enviando…');
+      const esperas = [0, 2000, 5000];   // hasta 3 intentos
+      for (const espera of esperas) {
+        if (espera) await new Promise(r => setTimeout(r, espera));
+        if (ultimoEnvio !== datos) return;   // se ha hecho otra elección mientras tanto
+        try {
+          const res = await fetch(FORMSPREE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(datos)
+          });
+          if (res.ok) {
+            if (ultimoEnvio === datos) estadoEnvio('📧 ¡Enviado!', 'ok');
+            return;
+          }
+        } catch (e) { /* sin conexión: se reintenta */ }
+      }
+      if (ultimoEnvio !== datos) return;
+      estadoEnvio('No se ha podido enviar.', 'error');
+      const btn = document.createElement('button');
+      btn.id = 'btn-reintentar';
+      btn.textContent = 'Reintentar';
+      btn.addEventListener('click', () => enviarCorreo(datos));
+      envio.appendChild(btn);
+    }
 
     document.getElementById('btn-volver-plan').addEventListener('click', () => mostrar('p-planes'));
     document.getElementById('btn-volver').addEventListener('click', () => mostrar('p-planes'));
