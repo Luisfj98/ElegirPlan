@@ -66,6 +66,7 @@
       font-size: 22px;
       padding: 14px 36px;
       transition: transform .25s ease;
+      transform-origin: top center;
       position: relative;
       z-index: 2;
     }
@@ -218,18 +219,17 @@
     let intentos = 0;
     let escala = 1;
 
-    // Escala máxima para que el SÍ quepa entero en la pantalla.
-    // El escalado se hace desde el centro del botón, así que se mira
-    // cuánto espacio libre hay desde ese centro hasta cada borde.
+    // Escala máxima para que el SÍ quepa entero en la pantalla sin tapar la pregunta.
+    // El SÍ crece desde su borde de arriba (transform-origin: top center),
+    // así que nunca sube hacia la pregunta: solo crece hacia los lados y hacia abajo.
     function escalaMaxima() {
       const margen = 16;
       const r = btnSi.getBoundingClientRect();
       const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
       const medioAncho = Math.min(cx, window.innerWidth - cx) - margen;
-      const medioAlto = Math.min(cy, window.innerHeight - cy) - margen;
+      const altoLibre = window.innerHeight - r.top - margen;
       const maxX = medioAncho / (btnSi.offsetWidth / 2);
-      const maxY = medioAlto / (btnSi.offsetHeight / 2);
+      const maxY = altoLibre / btnSi.offsetHeight;
       return Math.max(1, Math.min(maxX, maxY));
     }
 
