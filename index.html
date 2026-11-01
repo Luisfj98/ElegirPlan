@@ -4,7 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#f4f6fb" />
-  <title>Tengo un plan</title>
+  <title>Tengo una propuesta</title>
+
+  <!-- Vista previa al compartir el enlace (WhatsApp, Telegram, etc.) -->
+  <meta name="description" content="Ábrelo y responde" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://luisfj98.github.io/ElegirPlan/" />
+  <meta property="og:title" content="Tengo una propuesta" />
+  <meta property="og:description" content="Ábrelo y responde" />
+  <meta property="og:image" content="https://luisfj98.github.io/ElegirPlan/preview.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="es_ES" />
+  <meta name="twitter:card" content="summary_large_image" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -227,7 +239,24 @@
       color: #1f2937;
       outline: none;
     }
-    .campos input:focus { border-color: #2563eb; }
+    .campos input:focus, .campos textarea:focus { border-color: #2563eb; }
+    .campos textarea {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      font-family: inherit;
+      font-size: 17px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      color: #1f2937;
+      outline: none;
+      resize: none;
+    }
+    .campos .opcional { font-weight: 400; color: #6b7280; font-size: 14px; }
+    #comentario-final { font-size: 17px; color: #4b5563; font-style: italic; margin: -16px 0 24px; max-width: 560px; }
+    #comentario-final:empty { display: none; }
     /* iOS centra y recorta el valor de los campos de fecha/hora */
     .campos input::-webkit-date-and-time-value { text-align: left; margin: 0; }
     .campos input::-webkit-datetime-edit { padding: 0; }
@@ -276,6 +305,15 @@
     }
 
     /* Animación Cupra */
+    #confeti {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+    }
+
     #cupra-overlay {
       position: fixed;
       inset: 0;
@@ -402,6 +440,9 @@
       <label>Hora
         <input type="time" id="hora" step="300" />
       </label>
+      <label>¿Algo más? <span class="opcional">(opcional)</span>
+        <textarea id="comentario" rows="2" maxlength="300" placeholder="Por ejemplo: mejor por la tarde"></textarea>
+      </label>
     </div>
     <button id="btn-fecha-ok" disabled>Hecho</button>
     <button class="volver" id="btn-volver-plan">Cambiar de plan</button>
@@ -413,6 +454,7 @@
     <h1>¡Plan cerrado!</h1>
     <p class="resumen">Has elegido: <strong id="plan-final"></strong><br>
       el <strong id="fecha-final"></strong> a las <strong id="hora-final"></strong></p>
+    <p id="comentario-final"></p>
     <p id="envio" aria-live="polite"></p>
     <button class="volver" id="btn-volver">Cambiar plan o fecha</button>
   </section>
@@ -427,6 +469,8 @@
       </div>
     </div>
   </div>
+
+  <canvas id="confeti" aria-hidden="true"></canvas>
 
   <script>
     const mostrar = (id) => {
@@ -616,18 +660,22 @@
         weekday: 'long', day: 'numeric', month: 'long'
       });
       const horaTexto = inputHora.value;
+      const comentario = document.getElementById('comentario').value.trim();
 
       document.getElementById('plan-final').textContent = planFinal;
       document.getElementById('fecha-final').textContent = fechaTexto;
       document.getElementById('hora-final').textContent = horaTexto;
+      document.getElementById('comentario-final').textContent = comentario ? `«${comentario}»` : '';
 
       mostrar('p-fin');
+      lanzarConfeti();
 
       enviarCorreo({
         plan: planFinal,
         fecha: fechaTexto,
         hora: horaTexto,
         fecha_iso: inputFecha.value,
+        comentario: comentario || '(sin comentario)',
         _subject: `✅ Plan elegido: ${planFinal} (${fechaTexto}, ${horaTexto})`
       });
     });
@@ -672,6 +720,58 @@
 
     document.getElementById('btn-volver-plan').addEventListener('click', () => mostrar('p-planes'));
     document.getElementById('btn-volver').addEventListener('click', () => mostrar('p-planes'));
+
+    // ---------- Confeti ----------
+    function lanzarConfeti() {
+      const canvas = document.getElementById('confeti');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const W = window.innerWidth, H = window.innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const colores = ['#2563eb', '#ef4444', '#f59e0b', '#16a34a', '#a855f7', '#ec4899', '#c17d4c'];
+      const piezas = [];
+      // Dos ráfagas desde las esquinas de abajo + lluvia desde arriba
+      for (let i = 0; i < 160; i++) {
+        const lado = i % 3;
+        const desdeArriba = lado === 2;
+        piezas.push({
+          x: desdeArriba ? Math.random() * W : (lado === 0 ? -10 : W + 10),
+          y: desdeArriba ? -20 - Math.random() * H * .5 : H * .75,
+          vx: desdeArriba ? (Math.random() - .5) * 2 : (lado === 0 ? 1 : -1) * (4 + Math.random() * 7),
+          vy: desdeArriba ? 1 + Math.random() * 2 : -(10 + Math.random() * 9),
+          w: 6 + Math.random() * 6,
+          h: 8 + Math.random() * 8,
+          rot: Math.random() * Math.PI,
+          vr: (Math.random() - .5) * .3,
+          color: colores[i % colores.length]
+        });
+      }
+
+      const inicio = performance.now();
+      const DURACION = 3500;
+      function frame(t) {
+        const pasado = t - inicio;
+        ctx.clearRect(0, 0, W, H);
+        ctx.globalAlpha = pasado > DURACION - 800 ? Math.max(0, (DURACION - pasado) / 800) : 1;
+        for (const p of piezas) {
+          p.vy += .25;          // gravedad
+          p.vx *= .99;          // rozamiento
+          p.vy = Math.min(p.vy, 6);
+          p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.rot * 2)) + 2);
+          ctx.restore();
+        }
+        if (pasado < DURACION) requestAnimationFrame(frame);
+        else ctx.clearRect(0, 0, W, H);
+      }
+      requestAnimationFrame(frame);
+    }
   </script>
 </body>
 </html>
