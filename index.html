@@ -24,10 +24,13 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 24px 16px;
       text-align: center;
+      overflow-y: auto;
     }
+    /* Espaciadores: centran el contenido, pero si no cabe se puede hacer scroll sin que se corte por arriba */
+    .pantalla::before, .pantalla::after { content: ''; flex: 1 0 0; }
     .pantalla.activa { display: flex; animation: aparecer .5s ease; }
 
     @keyframes aparecer {
@@ -97,14 +100,25 @@
       color: #1f2937;
       border: 3px solid transparent;
       border-radius: 18px;
-      padding: 16px 10px;
-      font-size: 17px;
+      padding: 12px 8px;
+      font-size: 16px;
       box-shadow: 0 4px 12px rgba(31, 41, 55, .12);
       transition: transform .15s ease, border-color .15s ease;
     }
-    .plan .icono { display: block; font-size: 34px; margin-bottom: 6px; }
+    .plan .icono { display: block; font-size: 28px; margin-bottom: 4px; }
     .plan:hover { transform: translateY(-2px); }
     .plan.elegido { border-color: #2563eb; background: #eff4ff; }
+    .plan.combinable { border: 3px dashed #93b4f5; }
+
+    #pista-combinar {
+      display: none;
+      max-width: 560px;
+      margin: -6px 0 18px;
+      font-size: 15px;
+      color: #2563eb;
+      font-weight: 600;
+    }
+    #pista-combinar.visible { display: block; }
 
     #otro-wrap {
       width: 100%;
@@ -271,11 +285,14 @@
     <div class="planes" id="planes">
       <button class="plan" data-plan="Vuelta en el Cupra"><span class="icono">🚗</span>Vuelta en el Cupra</button>
       <button class="plan" data-plan="Comida en Riaño"><span class="icono">🏔️</span>Comida en Riaño</button>
+      <button class="plan" data-plan="Visitar un pueblo"><span class="icono">🏘️</span>Visitar un pueblo</button>
       <button class="plan" data-plan="Cocinar"><span class="icono">🍳</span>Cocinar</button>
       <button class="plan" data-plan="Dar un paseo"><span class="icono">🌳</span>Dar un paseo</button>
       <button class="plan" data-plan="Cenar sushi"><span class="icono">🍣</span>Cenar sushi</button>
       <button class="plan" data-plan="OTRO"><span class="icono">✍️</span>OTRO</button>
     </div>
+
+    <p id="pista-combinar">🚗 + Puedes combinarlo con «Comida en Riaño» o «Visitar un pueblo»</p>
 
     <div id="otro-wrap">
       <textarea id="otro-texto" rows="2" maxlength="200" placeholder="Escribe aquí tu plan..."></textarea>
@@ -405,11 +422,47 @@
     const otroWrap = document.getElementById('otro-wrap');
     const otroTexto = document.getElementById('otro-texto');
     const btnConfirmar = document.getElementById('btn-confirmar');
-    let planElegido = null;
+    const pista = document.getElementById('pista-combinar');
+
+    // La vuelta en el Cupra se puede combinar con uno de estos planes
+    const CUPRA = 'Vuelta en el Cupra';
+    const COMBINABLES = ['Comida en Riaño', 'Visitar un pueblo'];
+    let seleccion = [];   // planes elegidos (1, o 2 si es Cupra + combinable)
 
     function actualizarConfirmar() {
-      btnConfirmar.disabled = !planElegido ||
-        (planElegido === 'OTRO' && otroTexto.value.trim() === '');
+      btnConfirmar.disabled = seleccion.length === 0 ||
+        (seleccion.includes('OTRO') && otroTexto.value.trim() === '');
+    }
+
+    function pintarSeleccion() {
+      const soloCupra = seleccion.length === 1 && seleccion[0] === CUPRA;
+      planes.forEach(b => {
+        b.classList.toggle('elegido', seleccion.includes(b.dataset.plan));
+        b.classList.toggle('combinable', soloCupra && COMBINABLES.includes(b.dataset.plan));
+      });
+      pista.classList.toggle('visible', soloCupra);
+      otroWrap.classList.toggle('visible', seleccion.includes('OTRO'));
+      actualizarConfirmar();
+    }
+
+    function elegirPlan(plan) {
+      const tieneCupra = seleccion.includes(CUPRA);
+
+      if (seleccion.includes(plan)) {
+        // Pulsar un plan ya elegido lo quita
+        seleccion = seleccion.filter(p => p !== plan);
+      } else if (COMBINABLES.includes(plan) && tieneCupra) {
+        // Cupra + Riaño o Cupra + pueblo (solo uno de los dos)
+        seleccion = [CUPRA, plan];
+      } else if (plan === CUPRA && seleccion.length === 1 && COMBINABLES.includes(seleccion[0])) {
+        seleccion = [CUPRA, seleccion[0]];
+      } else {
+        seleccion = [plan];
+      }
+
+      if (plan === CUPRA && seleccion.includes(CUPRA)) animacionCupra();
+      if (plan === 'OTRO' && seleccion.includes('OTRO')) otroTexto.focus();
+      pintarSeleccion();
     }
 
     // Logo de Cupra: si no existe cupra-logo.png se muestra el texto "CUPRA"
@@ -429,22 +482,22 @@
     cupraOverlay.addEventListener('click', cerrarCupra);
 
     planes.forEach(btn => {
-      btn.addEventListener('click', () => {
-        planes.forEach(b => b.classList.remove('elegido'));
-        btn.classList.add('elegido');
-        planElegido = btn.dataset.plan;
-        otroWrap.classList.toggle('visible', planElegido === 'OTRO');
-        if (planElegido === 'OTRO') otroTexto.focus();
-        if (planElegido === 'Vuelta en el Cupra') animacionCupra();
-        actualizarConfirmar();
-      });
+      btn.addEventListener('click', () => elegirPlan(btn.dataset.plan));
     });
     otroTexto.addEventListener('input', actualizarConfirmar);
 
     let planFinal = '';
 
     btnConfirmar.addEventListener('click', () => {
-      planFinal = planElegido === 'OTRO' ? otroTexto.value.trim() : planElegido;
+      if (seleccion[0] === 'OTRO') {
+        planFinal = otroTexto.value.trim();
+      } else if (seleccion.length === 2) {
+        // "Vuelta en el Cupra y comida en Riaño"
+        const segundo = seleccion[1];
+        planFinal = `${seleccion[0]} y ${segundo.charAt(0).toLowerCase()}${segundo.slice(1)}`;
+      } else {
+        planFinal = seleccion[0];
+      }
       mostrar('p-fecha');
     });
 
