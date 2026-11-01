@@ -52,13 +52,18 @@
 
     .emoji { font-size: 64px; margin-bottom: 12px; }
 
-    /* Ojos que miran a un lado y a otro */
-    .mirar { display: inline-block; animation: mirar 4s ease-in-out infinite; }
-    @keyframes mirar {
-      0%, 25%   { transform: translateX(0); }
-      32%, 45%  { transform: translateX(-10px) rotate(-4deg); }
-      52%, 65%  { transform: translateX(10px) rotate(4deg); }
-      72%, 100% { transform: translateX(0); }
+    /* Cara pensativa que se balancea como dándole vueltas */
+    .pensar {
+      display: inline-block;
+      transform-origin: 50% 90%;
+      animation: pensar 3.2s ease-in-out infinite;
+    }
+    @keyframes pensar {
+      0%, 100% { transform: rotate(0deg) translateY(0); }
+      20%      { transform: rotate(-12deg) translateY(-3px); }
+      40%      { transform: rotate(-6deg) translateY(0); }
+      60%      { transform: rotate(10deg) translateY(-3px); }
+      80%      { transform: rotate(4deg) translateY(0); }
     }
 
     h1 {
@@ -376,7 +381,7 @@
 
   <!-- Pantalla 1: la pregunta -->
   <section class="pantalla activa" id="p-pregunta">
-    <div class="emoji"><span class="mirar">👀</span></div>
+    <div class="emoji"><span class="pensar">🤔</span></div>
     <h1>¿Hacemos un plan?</h1>
     <div class="botones" id="botones">
       <button id="btn-si">SÍ</button>
