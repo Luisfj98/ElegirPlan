@@ -132,7 +132,40 @@
       font-size: 20px;
       padding: 14px 40px;
     }
-    #btn-confirmar:disabled { opacity: .4; cursor: not-allowed; }
+    #btn-confirmar:disabled, #btn-fecha-ok:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Pantalla de fecha y hora */
+    .campos {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .campos label { font-weight: 600; font-size: 16px; }
+    .campos input {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      font-family: inherit;
+      font-size: 18px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      color: #1f2937;
+      outline: none;
+    }
+    .campos input:focus { border-color: #2563eb; }
+
+    #btn-fecha-ok {
+      background: #2563eb;
+      color: #fff;
+      font-size: 20px;
+      padding: 14px 40px;
+    }
 
     .resumen {
       font-size: clamp(20px, 5vw, 28px);
@@ -197,13 +230,30 @@
     <button id="btn-confirmar" disabled>¡Este!</button>
   </section>
 
-  <!-- Pantalla 3: confirmación -->
+  <!-- Pantalla 3: fecha y hora -->
+  <section class="pantalla" id="p-fecha">
+    <div class="emoji">🗓️</div>
+    <h1>¿Cuándo quedamos?</h1>
+    <div class="campos">
+      <label>Día
+        <input type="date" id="fecha" />
+      </label>
+      <label>Hora
+        <input type="time" id="hora" step="300" />
+      </label>
+    </div>
+    <button id="btn-fecha-ok" disabled>Hecho</button>
+    <button class="volver" id="btn-volver-plan">Cambiar de plan</button>
+  </section>
+
+  <!-- Pantalla 4: confirmación -->
   <section class="pantalla" id="p-fin">
     <div class="emoji">✅</div>
     <h1>¡Plan cerrado!</h1>
-    <p class="resumen">Has elegido: <strong id="plan-final"></strong></p>
+    <p class="resumen">Has elegido: <strong id="plan-final"></strong><br>
+      el <strong id="fecha-final"></strong> a las <strong id="hora-final"></strong></p>
     <a id="btn-whatsapp" href="#" target="_blank" rel="noopener">Enviármelo por WhatsApp</a>
-    <button class="volver" id="btn-volver">Cambiar de plan</button>
+    <button class="volver" id="btn-volver">Cambiar plan o fecha</button>
   </section>
 
   <script>
@@ -312,14 +362,46 @@
     });
     otroTexto.addEventListener('input', actualizarConfirmar);
 
+    let planFinal = '';
+
     btnConfirmar.addEventListener('click', () => {
-      const final = planElegido === 'OTRO' ? otroTexto.value.trim() : planElegido;
-      document.getElementById('plan-final').textContent = final;
-      const msg = `¡Sí! Me apunto. Plan elegido: ${final}`;
+      planFinal = planElegido === 'OTRO' ? otroTexto.value.trim() : planElegido;
+      mostrar('p-fecha');
+    });
+
+    // ---------- Pantalla 3: fecha y hora ----------
+    const inputFecha = document.getElementById('fecha');
+    const inputHora = document.getElementById('hora');
+    const btnFechaOk = document.getElementById('btn-fecha-ok');
+
+    // No se puede elegir un día que ya ha pasado
+    const hoy = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    inputFecha.min = `${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}-${pad(hoy.getDate())}`;
+
+    function actualizarFechaOk() {
+      btnFechaOk.disabled = !inputFecha.value || !inputHora.value || inputFecha.value < inputFecha.min;
+    }
+    inputFecha.addEventListener('input', actualizarFechaOk);
+    inputHora.addEventListener('input', actualizarFechaOk);
+
+    btnFechaOk.addEventListener('click', () => {
+      const [a, m, d] = inputFecha.value.split('-').map(Number);
+      const fechaTexto = new Date(a, m - 1, d).toLocaleDateString('es-ES', {
+        weekday: 'long', day: 'numeric', month: 'long'
+      });
+      const horaTexto = inputHora.value;
+
+      document.getElementById('plan-final').textContent = planFinal;
+      document.getElementById('fecha-final').textContent = fechaTexto;
+      document.getElementById('hora-final').textContent = horaTexto;
+
+      const msg = `¡Sí! Me apunto. Plan elegido: ${planFinal}, el ${fechaTexto} a las ${horaTexto}`;
       document.getElementById('btn-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
       mostrar('p-fin');
     });
 
+    document.getElementById('btn-volver-plan').addEventListener('click', () => mostrar('p-planes'));
     document.getElementById('btn-volver').addEventListener('click', () => mostrar('p-planes'));
   </script>
 </body>
