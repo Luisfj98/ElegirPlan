@@ -220,47 +220,68 @@
       justify-content: center;
       background: radial-gradient(circle, #1c1c1c 0%, #000 100%);
       cursor: pointer;
+      overflow: hidden;
     }
     #cupra-overlay.visible {
       display: flex;
-      animation: overlay 2.6s ease forwards;
+      animation: overlay 3.8s ease forwards;
     }
     #cupra-anim {
-      width: min(70vw, 70vh, 420px);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: 24px;
+      width: 100%;
     }
-    #cupra-overlay.visible #cupra-anim {
-      animation: crecer 2.6s cubic-bezier(.2, .8, .2, 1) forwards;
+
+    /* El coche entra desde la izquierda, frena con un pequeño rebote y se queda */
+    #cupra-coche {
+      width: min(88vw, 600px, 90vh);
+      height: auto;
+      filter: drop-shadow(0 18px 18px rgba(0, 0, 0, .8));
+      transform: translateX(-130vw);
+    }
+    #cupra-overlay.visible #cupra-coche {
+      animation: entrar 1.5s cubic-bezier(.15, .7, .3, 1) .2s forwards;
+    }
+
+    /* Después aparece el logo debajo */
+    #cupra-marca { opacity: 0; }
+    #cupra-overlay.visible #cupra-marca {
+      animation: logo .9s cubic-bezier(.2, .8, .2, 1) 1.5s forwards;
     }
     #cupra-logo {
-      width: 100%;
+      width: min(45vw, 230px, 28vh);
       height: auto;
-      filter: drop-shadow(0 0 24px rgba(193, 125, 76, .7));
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(193, 125, 76, .7));
     }
     #cupra-texto {
       display: none;
-      font-size: min(18vw, 120px);
+      font-size: min(14vw, 90px);
       font-weight: 800;
       letter-spacing: .12em;
       color: #c17d4c;
       text-shadow: 0 0 24px rgba(193, 125, 76, .7);
     }
-    #cupra-anim.sin-logo #cupra-logo { display: none; }
-    #cupra-anim.sin-logo #cupra-texto { display: block; }
+    #cupra-marca.sin-logo #cupra-logo { display: none; }
+    #cupra-marca.sin-logo #cupra-texto { display: block; }
 
-    @keyframes crecer {
-      0%   { transform: scale(.05) rotate(-180deg); opacity: 0; }
-      45%  { transform: scale(1.15) rotate(0deg);  opacity: 1; }
-      60%  { transform: scale(1); }
-      85%  { transform: scale(1);   opacity: 1; }
-      100% { transform: scale(2.2); opacity: 0; }
+    @keyframes entrar {
+      0%   { transform: translateX(-130vw) skewX(12deg); filter: blur(6px) drop-shadow(0 18px 18px rgba(0, 0, 0, .8)); }
+      60%  { transform: translateX(4vw) skewX(-4deg) rotate(-1deg); filter: blur(0) drop-shadow(0 18px 18px rgba(0, 0, 0, .8)); }
+      80%  { transform: translateX(-1vw) skewX(1deg) rotate(.5deg); }
+      100% { transform: translateX(0) skewX(0) rotate(0); filter: drop-shadow(0 18px 18px rgba(0, 0, 0, .8)); }
+    }
+    @keyframes logo {
+      0%   { transform: scale(.3); opacity: 0; }
+      70%  { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1);   opacity: 1; }
     }
     @keyframes overlay {
       0%   { opacity: 0; }
-      10%  { opacity: 1; }
-      85%  { opacity: 1; }
+      6%   { opacity: 1; }
+      88%  { opacity: 1; }
       100% { opacity: 0; }
     }
   </style>
@@ -330,8 +351,11 @@
   <!-- Animación del logo de Cupra -->
   <div id="cupra-overlay" aria-hidden="true">
     <div id="cupra-anim">
-      <img id="cupra-logo" src="cupra-logo.png" alt="Cupra" />
-      <div id="cupra-texto">CUPRA</div>
+      <img id="cupra-coche" src="cupra-coche.webp" alt="Cupra" />
+      <div id="cupra-marca">
+        <img id="cupra-logo" src="cupra-logo.png" alt="" />
+        <div id="cupra-texto">CUPRA</div>
+      </div>
     </div>
   </div>
 
@@ -467,10 +491,10 @@
 
     // Logo de Cupra: si no existe cupra-logo.png se muestra el texto "CUPRA"
     const cupraOverlay = document.getElementById('cupra-overlay');
-    const cupraAnim = document.getElementById('cupra-anim');
+    const cupraMarca = document.getElementById('cupra-marca');
     const cupraLogo = document.getElementById('cupra-logo');
-    cupraLogo.addEventListener('error', () => cupraAnim.classList.add('sin-logo'));
-    if (cupraLogo.complete && cupraLogo.naturalWidth === 0) cupraAnim.classList.add('sin-logo');
+    cupraLogo.addEventListener('error', () => cupraMarca.classList.add('sin-logo'));
+    if (cupraLogo.complete && cupraLogo.naturalWidth === 0) cupraMarca.classList.add('sin-logo');
 
     function animacionCupra() {
       cupraOverlay.classList.remove('visible');
