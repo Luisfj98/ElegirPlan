@@ -52,30 +52,13 @@
 
     .emoji { font-size: 64px; margin-bottom: 12px; }
 
-    /* Icono de calendario con fecha propia (el emoji 📅 no se puede cambiar) */
-    .calendario {
-      width: 56px;
-      margin-bottom: 14px;
-      border-radius: 11px;
-      overflow: hidden;
-      background: #fff;
-      box-shadow: 0 4px 12px rgba(31, 41, 55, .18);
-      border: 1px solid #d1d5db;
-    }
-    .cal-mes {
-      background: #ef4444;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .08em;
-      padding: 3px 0;
-    }
-    .cal-dia {
-      font-size: 29px;
-      font-weight: 700;
-      line-height: 1;
-      padding: 5px 0 6px;
-      color: #1f2937;
+    /* Ojos que miran a un lado y a otro */
+    .mirar { display: inline-block; animation: mirar 4s ease-in-out infinite; }
+    @keyframes mirar {
+      0%, 25%   { transform: translateX(0); }
+      32%, 45%  { transform: translateX(-10px) rotate(-4deg); }
+      52%, 65%  { transform: translateX(10px) rotate(4deg); }
+      72%, 100% { transform: translateX(0); }
     }
 
     h1 {
@@ -393,10 +376,7 @@
 
   <!-- Pantalla 1: la pregunta -->
   <section class="pantalla activa" id="p-pregunta">
-    <div class="calendario" aria-label="23 de julio">
-      <div class="cal-mes">JULIO</div>
-      <div class="cal-dia">23</div>
-    </div>
+    <div class="emoji"><span class="mirar">👀</span></div>
     <h1>¿Hacemos un plan?</h1>
     <div class="botones" id="botones">
       <button id="btn-si">SÍ</button>
