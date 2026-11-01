@@ -205,10 +205,18 @@
       margin-bottom: 24px;
       text-align: left;
     }
-    .campos label { font-weight: 600; font-size: 16px; }
+    .campos label { font-weight: 600; font-size: 16px; min-width: 0; }
     .campos input {
       display: block;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 54px;
+      line-height: normal;
+      text-align: left;
       margin-top: 6px;
       font-family: inherit;
       font-size: 18px;
@@ -220,6 +228,9 @@
       outline: none;
     }
     .campos input:focus { border-color: #2563eb; }
+    /* iOS centra y recorta el valor de los campos de fecha/hora */
+    .campos input::-webkit-date-and-time-value { text-align: left; margin: 0; }
+    .campos input::-webkit-datetime-edit { padding: 0; }
 
     #btn-fecha-ok {
       background: #2563eb;
@@ -237,7 +248,7 @@
 
     #envio {
       font-size: 15px;
-      margin: -12px 0 20px;
+      margin: -12px 0 8px;
       min-height: 22px;
       color: #6b7280;
     }
@@ -253,20 +264,9 @@
       padding: 0;
     }
 
-    #btn-whatsapp {
-      background: #25d366;
-      color: #fff;
-      font-size: 18px;
-      padding: 14px 30px;
-      text-decoration: none;
-      border-radius: 999px;
-      font-weight: 700;
-      box-shadow: 0 6px 16px rgba(31, 41, 55, .2);
-      display: inline-block;
-    }
 
     .volver {
-      margin-top: 18px;
+      margin-top: 10px;
       background: none;
       box-shadow: none;
       color: #1f2937;
@@ -414,7 +414,6 @@
     <p class="resumen">Has elegido: <strong id="plan-final"></strong><br>
       el <strong id="fecha-final"></strong> a las <strong id="hora-final"></strong></p>
     <p id="envio" aria-live="polite"></p>
-    <a id="btn-whatsapp" href="#" target="_blank" rel="noopener">Enviármelo por WhatsApp</a>
     <button class="volver" id="btn-volver">Cambiar plan o fecha</button>
   </section>
 
@@ -622,8 +621,6 @@
       document.getElementById('fecha-final').textContent = fechaTexto;
       document.getElementById('hora-final').textContent = horaTexto;
 
-      const msg = `¡Sí! Me apunto. Plan elegido: ${planFinal}, el ${fechaTexto} a las ${horaTexto}`;
-      document.getElementById('btn-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
       mostrar('p-fin');
 
       enviarCorreo({
