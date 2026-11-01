@@ -25,7 +25,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 24px 16px;
+      padding: clamp(12px, 3vh, 24px) 16px;
       text-align: center;
       overflow-y: auto;
     }
@@ -95,34 +95,51 @@
       margin-bottom: 20px;
     }
 
+    /* En la pantalla de planes la cuadrícula ocupa el alto disponible:
+       las tarjetas crecen en pantallas altas y se encogen en las bajas */
+    #p-planes::before, #p-planes::after { flex: 0 1 3vh; }
+    #p-planes .planes {
+      flex: 1 1 auto;
+      grid-auto-rows: minmax(min-content, 1fr);
+      max-height: 620px;
+      margin-bottom: clamp(6px, 1.6vh, 20px);
+    }
+    #p-planes #btn-confirmar { flex-shrink: 0; }
+
     .plan {
       background: #fff;
       color: #1f2937;
       border: 3px solid transparent;
-      padding: 8px 6px;
-      font-size: 15px;
+      padding: clamp(4px, 1vh, 10px) 6px;
+      font-size: clamp(15px, 2.2vh, 19px);
+      line-height: 1.2;
       border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       box-shadow: 0 4px 12px rgba(31, 41, 55, .12);
       transition: transform .15s ease, border-color .15s ease;
     }
-    .plan .icono { display: block; font-size: 22px; margin-bottom: 2px; }
+    .plan .icono { display: block; font-size: clamp(20px, 3.8vh, 40px); margin-bottom: clamp(2px, .8vh, 8px); }
 
     /* Cabecera más compacta en la pantalla de planes para que quepa todo */
-    #p-planes .emoji { font-size: 44px; margin-bottom: 6px; }
-    #p-planes h1 { font-size: clamp(22px, 5.5vw, 36px); margin-bottom: 16px; }
+    #p-planes .emoji { font-size: clamp(30px, 6vh, 64px); margin-bottom: clamp(2px, 1vh, 12px); }
+    #p-planes h1 { font-size: clamp(22px, min(5.5vw, 4.4vh), 36px); margin-bottom: clamp(8px, 2.5vh, 28px); }
     .plan:hover { transform: translateY(-2px); }
     .plan.elegido { border-color: #2563eb; background: #eff4ff; }
     .plan.combinable { border: 3px dashed #93b4f5; }
 
     #pista-combinar {
-      display: none;
+      visibility: hidden;
       max-width: 560px;
-      margin: -4px 0 12px;
+      margin: 0 0 clamp(6px, 1.6vh, 18px);
       font-size: 15px;
+      flex-shrink: 0;
       color: #2563eb;
       font-weight: 600;
     }
-    #pista-combinar.visible { display: block; }
+    #pista-combinar.visible { visibility: visible; }
 
     #otro-wrap {
       width: 100%;
