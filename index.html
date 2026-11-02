@@ -167,11 +167,12 @@
       /* Icono en la misma línea que el texto, todo centrado */
       .plan .icono {
         display: inline-block;
-        font-size: clamp(20px, 3.2vh, 30px);
+        font-size: clamp(18px, 3vh, 30px);
+        line-height: 1;
         margin: 0 6px 0 0;
-        vertical-align: middle;
+        vertical-align: -0.2em;
       }
-      .plan .contenido { line-height: 1.25; }
+      .plan .contenido { line-height: 1.2; }
       #p-planes .planes { max-height: 480px; }
       /* OTRO va solo en la última fila: centrado y con el mismo ancho que los demás */
       .plan[data-plan="OTRO"] {
@@ -179,6 +180,11 @@
         justify-self: center;
         width: calc((100% - 8px) / 2);
       }
+    }
+    /* Pantallas bajas: cuadro de OTRO más compacto */
+    @media (max-height: 700px) {
+      #otro-wrap #otro-texto { padding: 8px 12px; font-size: 16px; }
+      #otro-wrap { margin-bottom: 10px; }
     }
     .plan:hover { transform: translateY(-2px); }
     .plan.elegido { border-color: #2563eb; background: #eff4ff; }
@@ -194,6 +200,8 @@
       font-weight: 600;
     }
     #pista-combinar.visible { visibility: visible; }
+    /* Con OTRO elegido el aviso nunca aparece: que no ocupe sitio */
+    #p-planes:has(#otro-wrap.visible) #pista-combinar { display: none; }
 
     #otro-wrap {
       width: 100%;
