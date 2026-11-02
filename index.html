@@ -158,15 +158,20 @@
        y quepan todos los planes sin tener que desplazarse */
     @media (max-width: 600px) {
       .plan {
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 8px;
+        justify-content: center;
         padding: 4px 10px;
-        text-align: left;
+        text-align: center;
         font-size: clamp(14px, 2vh, 17px);
         min-height: 44px;
       }
-      .plan .icono { font-size: clamp(20px, 3.2vh, 30px); margin-bottom: 0; flex-shrink: 0; }
+      /* Icono en la misma línea que el texto, todo centrado */
+      .plan .icono {
+        display: inline-block;
+        font-size: clamp(20px, 3.2vh, 30px);
+        margin: 0 6px 0 0;
+        vertical-align: middle;
+      }
+      .plan .contenido { line-height: 1.25; }
       #p-planes .planes { max-height: 480px; }
       /* OTRO va solo en la última fila: centrado y con el mismo ancho que los demás */
       .plan[data-plan="OTRO"] {
@@ -418,15 +423,15 @@
     <h1>¡Genial!<br>¿Qué plan te apetece?</h1>
 
     <div class="planes" id="planes">
-      <button class="plan" data-plan="Vuelta en el Cupra"><span class="icono">🚗</span>Vuelta en el Cupra</button>
-      <button class="plan" data-plan="Comida en Riaño"><span class="icono">🏔️</span>Comida en Riaño</button>
-      <button class="plan" data-plan="Visitar un pueblo"><span class="icono">🏘️</span>Visitar un pueblo</button>
-      <button class="plan" data-plan="Cocinar"><span class="icono">🍳</span>Cocinar</button>
-      <button class="plan" data-plan="Dar un paseo"><span class="icono">🌳</span>Dar un paseo</button>
-      <button class="plan" data-plan="Desayunar en un sitio nuevo"><span class="icono">🥐</span>Desayunar en un sitio nuevo</button>
-      <button class="plan" data-plan="Montar un Lego"><span class="icono">🧱</span>Montar un Lego</button>
-      <button class="plan" data-plan="Cenar sushi"><span class="icono">🍣</span>Cenar sushi</button>
-      <button class="plan" data-plan="OTRO"><span class="icono">✍️</span>OTRO</button>
+      <button class="plan" data-plan="Vuelta en el Cupra"><span class="contenido"><span class="icono">🚗</span>Vuelta en el Cupra</span></button>
+      <button class="plan" data-plan="Comida en Riaño"><span class="contenido"><span class="icono">🏔️</span>Comida en Riaño</span></button>
+      <button class="plan" data-plan="Visitar un pueblo"><span class="contenido"><span class="icono">🏘️</span>Visitar un pueblo</span></button>
+      <button class="plan" data-plan="Cocinar"><span class="contenido"><span class="icono">🍳</span>Cocinar</span></button>
+      <button class="plan" data-plan="Dar un paseo"><span class="contenido"><span class="icono">🌳</span>Dar un paseo</span></button>
+      <button class="plan" data-plan="Desayunar en un sitio nuevo"><span class="contenido"><span class="icono">🥐</span>Desayunar en un sitio nuevo</span></button>
+      <button class="plan" data-plan="Montar un Lego"><span class="contenido"><span class="icono">🧱</span>Montar un Lego</span></button>
+      <button class="plan" data-plan="Cenar sushi"><span class="contenido"><span class="icono">🍣</span>Cenar sushi</span></button>
+      <button class="plan" data-plan="OTRO"><span class="contenido"><span class="icono">✍️</span>OTRO</span></button>
     </div>
 
     <p id="pista-combinar">🚗 + Puedes combinarlo con «Comida en Riaño» o «Visitar un pueblo»</p>
