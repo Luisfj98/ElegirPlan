@@ -74,6 +74,51 @@
       line-height: 1.2;
     }
 
+    /* Pantalla de contraseña */
+    .clave-titulo { margin-bottom: 20px; }
+    .clave-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 320px;
+    }
+    .clave-pista { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+    #clave {
+      width: 100%;
+      font-family: inherit;
+      font-size: 20px;
+      text-align: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      color: #1f2937;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    #clave:focus { border-color: #2563eb; }
+    #clave.mal { border-color: #dc2626; animation: temblar .4s ease; }
+    #clave-error { color: #dc2626; font-size: 15px; font-weight: 600; min-height: 22px; margin: 8px 0 12px; }
+    #btn-clave {
+      background: #2563eb;
+      color: #fff;
+      font-size: 20px;
+      padding: 14px 40px;
+    }
+    #candado.abierto { animation: abrir .6s ease; }
+    @keyframes temblar {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    @keyframes abrir {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.3) rotate(-10deg); }
+      100% { transform: scale(1); }
+    }
+
     .botones {
       display: flex;
       gap: 20px;
@@ -416,7 +461,19 @@
 <body>
 
   <!-- Pantalla 1: la pregunta -->
-  <section class="pantalla activa" id="p-pregunta">
+  <!-- Pantalla 0: contraseña -->
+  <section class="pantalla activa" id="p-clave">
+    <div class="emoji" id="candado">🔒</div>
+    <h1 class="clave-titulo">Apodo cariñoso</h1>
+    <form id="form-clave" class="clave-form" autocomplete="off">
+      <label for="clave" class="clave-pista">Soy tu…</label>
+      <input type="text" id="clave" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="go" />
+      <p id="clave-error" aria-live="polite"></p>
+      <button type="submit" id="btn-clave">Entrar</button>
+    </form>
+  </section>
+
+  <section class="pantalla" id="p-pregunta">
     <div class="emoji"><span class="pensar">🤔</span></div>
     <h1>¿Hacemos un plan?</h1>
     <div class="botones" id="botones">
@@ -499,6 +556,35 @@
       document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
       document.getElementById(id).classList.add('activa');
     };
+
+    // ---------- Pantalla 0: contraseña ----------
+    const CLAVE = 'chuchi';
+    const formClave = document.getElementById('form-clave');
+    const inputClave = document.getElementById('clave');
+    const errorClave = document.getElementById('clave-error');
+    const candado = document.getElementById('candado');
+    const fallos = ['¡Esa no es!', 'Nop, prueba otra vez', 'Frío, frío…', 'Piénsalo un poco más'];
+    let numFallos = 0;
+
+    formClave.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Se compara en minúsculas y sin espacios, por si el móvil pone la primera letra en mayúscula
+      const valor = inputClave.value.trim().toLowerCase();
+      if (valor === CLAVE) {
+        inputClave.blur();
+        errorClave.textContent = '';
+        candado.textContent = '🔓';
+        candado.classList.add('abierto');
+        setTimeout(() => mostrar('p-pregunta'), 700);
+      } else {
+        errorClave.textContent = fallos[numFallos++ % fallos.length];
+        inputClave.classList.remove('mal');
+        void inputClave.offsetWidth;   // reinicia la animación de temblor
+        inputClave.classList.add('mal');
+        inputClave.select();
+      }
+    });
+    inputClave.addEventListener('input', () => { inputClave.classList.remove('mal'); errorClave.textContent = ''; });
 
     // ---------- Pantalla 1: el NO se escapa y el SÍ crece ----------
     const btnSi = document.getElementById('btn-si');
