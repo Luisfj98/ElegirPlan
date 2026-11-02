@@ -168,6 +168,12 @@
       }
       .plan .icono { font-size: clamp(20px, 3.2vh, 30px); margin-bottom: 0; flex-shrink: 0; }
       #p-planes .planes { max-height: 480px; }
+      /* OTRO va solo en la última fila: centrado y con el mismo ancho que los demás */
+      .plan[data-plan="OTRO"] {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc((100% - 8px) / 2);
+      }
     }
     .plan:hover { transform: translateY(-2px); }
     .plan.elegido { border-color: #2563eb; background: #eff4ff; }
