@@ -154,6 +154,21 @@
     /* Cabecera más compacta en la pantalla de planes para que quepa todo */
     #p-planes .emoji { font-size: clamp(30px, 6vh, 64px); margin-bottom: clamp(2px, 1vh, 12px); }
     #p-planes h1 { font-size: clamp(22px, min(5.5vw, 4.4vh), 36px); margin-bottom: clamp(8px, 2.5vh, 28px); }
+    /* En móvil: icono a la izquierda del texto para que las tarjetas sean más bajas
+       y quepan todos los planes sin tener que desplazarse */
+    @media (max-width: 600px) {
+      .plan {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 8px;
+        padding: 4px 10px;
+        text-align: left;
+        font-size: clamp(14px, 2vh, 17px);
+        min-height: 44px;
+      }
+      .plan .icono { font-size: clamp(20px, 3.2vh, 30px); margin-bottom: 0; flex-shrink: 0; }
+      #p-planes .planes { max-height: 480px; }
+    }
     .plan:hover { transform: translateY(-2px); }
     .plan.elegido { border-color: #2563eb; background: #eff4ff; }
     .plan.combinable { border: 3px dashed #93b4f5; }
@@ -403,6 +418,7 @@
       <button class="plan" data-plan="Cocinar"><span class="icono">🍳</span>Cocinar</button>
       <button class="plan" data-plan="Dar un paseo"><span class="icono">🌳</span>Dar un paseo</button>
       <button class="plan" data-plan="Desayunar en un sitio nuevo"><span class="icono">🥐</span>Desayunar en un sitio nuevo</button>
+      <button class="plan" data-plan="Montar un Lego"><span class="icono">🧱</span>Montar un Lego</button>
       <button class="plan" data-plan="Cenar sushi"><span class="icono">🍣</span>Cenar sushi</button>
       <button class="plan" data-plan="OTRO"><span class="icono">✍️</span>OTRO</button>
     </div>
